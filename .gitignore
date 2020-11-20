@@ -1,0 +1,7 @@
+*~
+.*.swp
+
+# Build files
+/build/
+/dist/
+/*.egg-info/
