@@ -27,7 +27,6 @@ from http.client import HTTPSConnection
 
 HOST_NAME = "api.listenbrainz.org"
 PATH_SUBMIT = "/1/submit-listens"
-SSL_CONTEXT = ssl.create_default_context()
 
 
 class Track:
@@ -78,11 +77,12 @@ class ListenBrainzClient:
     See https://listenbrainz.readthedocs.io/en/latest/users/api/index.html
     """
 
-    def __init__(self, user_token, timeout=30, logger=logging.getLogger(__name__)):
+    def __init__(self, user_token, timeout=30, logger=None, ssl_context=None):
         self.__next_request_time = 0
-        self.user_token = user_token
-        self.logger = logger
+        self._user_token_ = user_token
         self._timeout = timeout
+        self._logger = logger or logging.getLogger(__name__)
+        self._ssl_context = ssl_context or ssl.create_default_context()
 
     def listen(self, listened_at, track):
         """
@@ -111,14 +111,15 @@ class ListenBrainzClient:
 
     def _submit(self, listen_type, payload, retry=0):
         self._wait_for_ratelimit()
-        self.logger.debug("ListenBrainz %s: %r", listen_type, payload)
+        self._logger.debug("ListenBrainz %s: %r", listen_type, payload)
         data = {"listen_type": listen_type, "payload": payload}
         headers = {
-            "Authorization": "Token %s" % self.user_token,
+            "Authorization": "Token %s" % self._user_token,
             "Content-Type": "application/json",
         }
         body = json.dumps(data)
-        conn = HTTPSConnection(HOST_NAME, context=SSL_CONTEXT, timeout=self._timeout)
+        conn = HTTPSConnection(HOST_NAME, context=self._ssl_context,
+                               timeout=self._timeout)
         try:
             conn.request("POST", PATH_SUBMIT, body, headers)
             response = conn.getresponse()
@@ -134,26 +135,26 @@ class ListenBrainzClient:
         self._handle_ratelimit(response)
         log_msg = "Response %s: %r" % (response.status, response_data)
         if response.status == 429 and retry < 5:  # Too Many Requests
-            self.logger.warning(log_msg)
+            self._logger.warning(log_msg)
             return self._submit(listen_type, payload, retry + 1)
         elif response.status == 200:
-            self.logger.debug(log_msg)
+            self._logger.debug(log_msg)
         else:
-            self.logger.error(log_msg)
+            self._logger.error(log_msg)
         return response
 
     def _wait_for_ratelimit(self):
         now = time.time()
         if self.__next_request_time > now:
             delay = self.__next_request_time - now
-            self.logger.debug("Rate limit applies, delay %d", delay)
+            self._logger.debug("Rate limit applies, delay %d", delay)
             time.sleep(delay)
 
     def _handle_ratelimit(self, response):
         remaining = int(response.getheader("X-RateLimit-Remaining", 0))
         reset_in = int(response.getheader("X-RateLimit-Reset-In", 0))
-        self.logger.debug("X-RateLimit-Remaining: %i", remaining)
-        self.logger.debug("X-RateLimit-Reset-In: %i", reset_in)
+        self._logger.debug("X-RateLimit-Remaining: %i", remaining)
+        self._logger.debug("X-RateLimit-Reset-In: %i", reset_in)
         if remaining == 0:
             self.__next_request_time = time.time() + reset_in
 
