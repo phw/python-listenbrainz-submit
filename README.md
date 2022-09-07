@@ -38,7 +38,7 @@ client.playing_now(track)
 
 To actually submit a track as has been listened to call:
 
-```
+```python
 # Submit the listen with a current timestamp
 client.listen(int(time.time()), track)
 ```
@@ -51,6 +51,6 @@ which describes the metadata that can be submitted.
 
 # License
 
-listenbrainz-submit © 2018 Philipp Wolfer ph.wolfer@gmail.com
+listenbrainz-submit © 2018-2022 Philipp Wolfer ph.wolfer@gmail.com
 
 Published under the MIT license, see LICENSE for details.
