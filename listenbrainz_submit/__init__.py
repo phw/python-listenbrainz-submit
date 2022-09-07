@@ -79,7 +79,7 @@ class ListenBrainzClient:
 
     def __init__(self, user_token, timeout=30, logger=None, ssl_context=None):
         self.__next_request_time = 0
-        self._user_token_ = user_token
+        self._user_token = user_token
         self._timeout = timeout
         self._logger = logger or logging.getLogger(__name__)
         self._ssl_context = ssl_context or ssl.create_default_context()
