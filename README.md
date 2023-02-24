@@ -1,5 +1,7 @@
 # Python module to submit listens to the ListenBrainz service
 
+**This project has been moved to https://git.sr.ht/~phw/python-listenbrainz-submit**
+
 Simple python module to submit listens to the ListenBrainz server.
 
 Supports submitting single listens, now playing notifications and import of
