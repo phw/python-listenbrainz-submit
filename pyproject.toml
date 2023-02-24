@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "listenbrainz_submit"
-version = "1.0"
+version = "1.0.1"
 authors = [
   { name="Philipp Wolfer", email="ph.wolfer@gmail.com" },
 ]
@@ -19,5 +19,5 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "http://github.com/phw/python-listenbrainz-submit"
-"Bug Tracker" = "http://github.com/phw/python-listenbrainz-submit/issues"
+"Homepage" = "https://git.sr.ht/~phw/python-listenbrainz-submit"
+"Bug Tracker" = "https://todo.sr.ht/~phw/python-listenbrainz-submit"
