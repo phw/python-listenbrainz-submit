@@ -1,0 +1,28 @@
+image: archlinux
+packages:
+  - python-build
+  - python-pip
+  - twine
+environment:
+  CODESIGN_IDENTITY: phw@uploadedlobster.com
+secrets:
+  - fc242eb9-0f18-4333-8911-f8abf5df8d7e
+  - 69e63d16-2d47-43ce-a625-851780502828
+artifacts:
+  - artifacts.tar.gz
+tasks:
+  - build: |
+      cd python-listenbrainz-submit
+      python3 -m build
+      mkdir ../artifacts
+  - bundle_artifacts: |
+      cd python-listenbrainz-submit
+      tar cvzf ../artifacts.tar.gz dist/*
+  # Skip publishing if this is not a tagged release
+  - only-tags: |
+      cd python-listenbrainz-submit
+      GIT_REF=$(git describe --always)
+      [[ "$GIT_REF" =~ ^v[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || complete-build
+  - publish: |
+      cd python-listenbrainz-submit
+      twine upload --non-interactive --sign --identity "$CODESIGN_IDENTITY" dist/*
